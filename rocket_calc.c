@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 
-void propellant_assign(float* burn_expo, float* temp_co,float *c_star){
+void propellant_assign(double* burn_expo, double* temp_co,double *c_star){
 char b_rate_name[10] = {"white lightning"};
 //float c_[10] = {};//cstar
-float b_rate_x[10] = {0.45};
-float temp_re[10] = {0.012};
+double b_rate_x[10] = {0.45};
+double temp_re[10] = {0.012};
 int choice = 0,num = 0,i,total = 1;//to keep track total number of propellants,and to iterate through list in assinging values
 
 printf("PROPELLANT DESIGN VALUES\n");
@@ -49,27 +49,27 @@ if(num == 3){
 
 }
 
-void grain_geo(float a){//this only measures bates geometry
+void grain_geo(double* burn_area){//this only measures bates geometry
 printf("This is for bates grains burning surface only\n");
-float grain_length,hole;
+double grain_length,hole,a;
 printf("give us the grain length\n");
-scanf("%f",&grain_length);
+scanf("%lf",&grain_length);
 printf("give us the hole diameter\n");
-scanf("%f",&hole);
-a = (2*PI*(hole/2)*grain_length) + (2*PI*(hole/2));
-
+scanf("%lf",&hole);
+*burn_area = (2*M_PI*(hole/2)*grain_length) + (2*M_PI*(hole/2));
 }
 
 int main(){
 int choice;
-float k = 1.3, p_den = 0.06576 ,R = 345.7;
-float p_1,c_star; //pressure values
-float inlet_rad, inlet_ar; //inlet values
-float throat_rad, throat_ar; //throat values
-float exit_rad, exit_ar; //exit values
-float temp_co, burn_expo; //burn rate component
-float mass_flow,burn_area,burn_rate;
-float temp_1 = 2339.042;
+double k = 1.3, p_den = 1820.23053 ,R = 8.3144; // r is molecular weight
+double p_1,c_star; //pressure values
+double inlet_rad, inlet_ar; //inlet values
+double throat_rad; //throat values
+double throat_ar;
+double exit_rad, exit_ar; //exit values
+double temp_co, burn_expo; //burn rate component
+double mass_flow,burn_area;
+double temp_1 = 2339.042;
 printf("Do you want to assign a new propellant value or keep standard propellant 1 for no or 2 for yes \n");
 scanf("%d",&choice);
 if(choice == 2){//for propellant values
@@ -79,20 +79,28 @@ if(choice == 2){//for propellant values
 printf("Do you want to find a burning area for specfic grain geometry 1 for no and 3 for yes \n");
 scanf("%d",&choice);
 if(choice == 3){
-    grain_geo(burn_area);
+    grain_geo(&burn_area);
 }
 printf("What is your desired chamber pressure\n");
-scanf("%f",&p_1);
+scanf("%lf",&p_1);
 
-printf("%f", temp_co);
+printf("these are burn rates values\n");
+printf("%f ", temp_co);
+printf("%f ", burn_expo);
+printf("%f\n ", burn_area);
 
-burn_rate = temp_co * pow(p_1,burn_expo); //pow(p_1, burn_expo);
+double burn_rate = temp_co * pow(p_1,burn_expo); //pow(p_1, burn_expo);
 
 
-throat_ar = (burn_area * (p_den * burn_rate * sqrt(R * temp_1)))/(p_1 * sqrt(k * pow(2/(k + 1),(k + 1)/(k - 1))));
-
+float sub_value = burn_area * (burn_rate * p_den * sqrt(R * temp_1));//denominator burn
+float sub_value_2 = p_1 * sqrt(k * pow(2/(k + 1),(k + 1)/(k - 1)));
+throat_ar = sub_value / sub_value_2;
+throat_rad = sqrt(throat_ar/(M_PI));
+printf("New Calculated values\n");
+printf(" %f", sub_value);
+printf(" %f", sub_value_2);
 printf(" %f", burn_rate);
 printf(" %f", throat_ar);
-
+printf(" %f", throat_rad);
 return 0;
 }
