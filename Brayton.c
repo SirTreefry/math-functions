@@ -21,7 +21,7 @@ float tm_4; //temp of state 4 exiting the turbine into the ambient air
 float tm_5;
 float Q_in; //heat entering the combustor
 float W_C; // work of the compressor
-float C_R = 10; // compression ratio
+float C_R = 5; // compression ratio
 float T_R = 4.5; //turbine pressure ratio
 float W_T; //work of the turbine
 float N_eff; // effeincey of the cycle
@@ -61,6 +61,7 @@ BWR = (W_C * -1)/(W_T); //back work ratio
 N_eff = (W_T + W_C)/Q_in; //thermal effciency
 W_net = W_T - W_C;//net work done
 Press_diff = P_5 / P_4;
+tm_5 = tm_4;
 out_v = sqrt(2* cp * tm_4 * N_eff * (1 - (1/pow(1/Press_diff,((k-1)/k)))));// equation for exit velocity
 thrust = M_dot * out_v; //thrust equation
 V_1 = (n* R * tm_1) / P_1;
@@ -93,8 +94,24 @@ fprintf(file, "%f  %f\n", V_2,P_2);
 fprintf(file, "%f  %f\n", V_3,P_3);
 fprintf(file, "%f  %f\n", V_4,P_4);
 fprintf(file, "%f  %f\n", V_5,P_5);
-
+fprintf(file, "%f  %f\n", V_1,P_1);
 
 // Close the file
 fclose(file);
+
+FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
+    if (gnuplotPipe == NULL) {
+        fprintf(stderr, "Could not open Gnuplot pipe.\n");
+        return 1;
+    }
+
+    // Send commands to Gnuplot
+    fprintf(gnuplotPipe, "set title 'Brayton Cycle Plot'\n");
+    fprintf(gnuplotPipe, "set xlabel 'X-axis Label'\n"); // Change to your actual label
+    fprintf(gnuplotPipe, "set ylabel 'Y-axis Label'\n"); // Change to your actual label
+    fprintf(gnuplotPipe, "plot 'brayton.dat' using 1:2 with lines title 'Data'\n");
+
+
+    // Close the pipe
+    pclose(gnuplotPipe);
 }
