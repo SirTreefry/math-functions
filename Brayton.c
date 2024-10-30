@@ -8,20 +8,21 @@
 //cold air standard
 int main(){
 //preset values or measured values
-int i; //for gnu plot output loop
-float M_dot = .64; //mass flow of system
+int i,count; //for gnu plot output loop
+float M_dot = 12; //mass flow of system
 float k = 1.4;
 float cp = 1.005;
 float cv = .7165;
-float R; //gas constant for air
+float R = 8.314; //gas constant for air
 float tm_1 = 300; //temp of state 1 entering compressor ambient air
 float tm_2; //temp state 2 exiting compressor
 float tm_3 = 2000; //temp of state 3 exiting the combustor
 float tm_4; //temp of state 4 exiting the turbine into the ambient air
+float tm_5;
 float Q_in; //heat entering the combustor
 float W_C; // work of the compressor
-float C_R = 6; // compression ratio
-float T_R = 4; //turbine pressure ratio
+float C_R = 10; // compression ratio
+float T_R = 4.5; //turbine pressure ratio
 float W_T; //work of the turbine
 float N_eff; // effeincey of the cycle
 float BWR; //backwork of cycle
@@ -35,11 +36,18 @@ float P_2;
 float P_3;
 float P_4;
 float P_5 = 101.25; //ambient air
+float V_1;//volume state 1
+float V_2;
+float V_3;
+float V_4;
+float V_5;
 float thrust; //total thrust
 float in_v, out_v; //inlet and outlet velocity
 float Press_diff; //ratio between turbine exit and atmospheric pressure
+float n; //number moles air
+float m_m = 28.96;//molar mass
 
-
+n = M_dot / m_m;
 in_v = 0;
 P_2 = C_R * P_1; //pressure calculation for p2
 tm_2 = tm_1 * pow((P_2 / P_1), ((k-1)/k));//temp 2
@@ -55,7 +63,11 @@ W_net = W_T - W_C;//net work done
 Press_diff = P_5 / P_4;
 out_v = sqrt(2* cp * tm_4 * N_eff * (1 - (1/pow(1/Press_diff,((k-1)/k)))));// equation for exit velocity
 thrust = M_dot * out_v; //thrust equation
-
+V_1 = (n* R * tm_1) / P_1;
+V_2 = (n* R * tm_2) / P_2;
+V_3 = (n* R * tm_3) / P_3;
+V_4 = (n* R * tm_4) / P_4;
+V_5 = (n* R * tm_5) / P_5;
 
 printf("%f \n", P_2);
 printf("%f \n", tm_2);
@@ -69,10 +81,20 @@ printf("Power Produced %f \n", W_net);
 printf("Exit Velocity %f \n", out_v);
 printf("Thrust %f \n", thrust);
 
-FILE *gnuplot = popen("gnuplot", "w"); //writing to gnuplot
-fprintf(gnuplot, "plot '-'\n");
-for (i = 0; i < count; i++)
-    fprintf(gnuplot, "%g %g\n", x[i], y[i]);
-fprintf(gnuplot, "e\n");
-fflush(gnuplot);
+// Open a file in write mode ("w") or binary write mode ("wb")
+FILE *file = fopen("brayton.dat", "w");  // Use "w" for text, "wb" for binary
+
+// Sample data to write to the file
+
+//size_t written = fwrite(numbers, sizeof(int), num_elements, file);
+//fprintf(file, "Temp  Pressure\n");
+fprintf(file, "%f  %f\n", V_1,P_1);
+fprintf(file, "%f  %f\n", V_2,P_2);
+fprintf(file, "%f  %f\n", V_3,P_3);
+fprintf(file, "%f  %f\n", V_4,P_4);
+fprintf(file, "%f  %f\n", V_5,P_5);
+
+
+// Close the file
+fclose(file);
 }
