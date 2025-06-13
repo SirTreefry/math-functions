@@ -1,6 +1,6 @@
 fprintf("============================================================\n")
 fprintf("Project 2 - finding the root of a scalar equation\n")
-fprintf("Andrew Trefry\n")
+fprintf("\n")%put your name
 display(date())
 fprintf("============================================================\n\n")
 
